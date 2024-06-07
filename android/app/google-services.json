@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "752656558467",
+    "project_id": "gophbar-c74d6",
+    "storage_bucket": "gophbar-c74d6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:752656558467:android:336b8575cf76497f1eaeb6",
+        "android_client_info": {
+          "package_name": "com.gophbar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3fqUdp44u4Y4XSpocppEGCKdC78BWv8c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

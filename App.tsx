@@ -1,114 +1,97 @@
 import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
+import { SafeAreaView, StyleSheet, Text, View, FlatList, Image, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 enableScreens();
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+// Dummy data for bars
+const barsData = [
+  { id: '1', name: "Sally's Saloon", address: '700 SE Washington Ave, Minneapolis, MN 55414', specials: 'Happy Hour: 5-7 PM' },
+  { id: '2', name: 'Blarney Pub & Grill', address: '412 14th Ave SE, Minneapolis, MN 55414', specials: '2-for-1 Cocktails: 6-8 PM' },
+  { id: '3', name: 'Kollege Klub Dinkytown', address: '1301 4th St SE, Minneapolis, MN 55414', specials: 'Discount Beers: All Day' },
+  { id: '4', name: 'Burrito Loco', address: '418 13th Ave SE, Minneapolis, MN 55414', specials: 'Discount Beers: All Day' },
+];
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+function BarItem({ name, address, specials }) {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={styles.barItem}>
+      <Text style={styles.barName}>{name}</Text>
+      <Text style={styles.barAddress}>{address}</Text>
+      <Text style={styles.barSpecials}>{specials}</Text>
     </View>
   );
 }
 
-function HomeScreen() {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+function BarsScreen() {
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <SafeAreaView style={styles.barsContainer}>
+      <FlatList
+        data={barsData}
+        renderItem={({ item }) => <BarItem name={item.name} address={item.address} specials={item.specials} />}
+        keyExtractor={item => item.id}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
     </SafeAreaView>
   );
 }
 
-function SettingsScreen() {
+function HomeScreen() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Settings!</Text>
+    <View style={styles.homeContainer}>
+      <Text>Home!</Text>
     </View>
   );
 }
 
 const Tab = createBottomTabNavigator();
 
+function LogoTitle() {
+  return (
+    <Image
+      style={{ width: 200, height: 80, alignSelf: 'center' }}
+      source={require('./cartman.png')}
+      resizeMode="contain"
+    />
+  );
+}
+
 function MainTabs() {
   return (
-    <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+    <Tab.Navigator
+    screenOptions={{
+      tabBarActiveTintColor: '#870721', // Active tab color
+      tabBarInactiveTintColor: 'grey', // Inactive tab color
+      tabBarStyle: { backgroundColor: '#eeeeee' }, // Tab bar background color
+      headerStyle: { 
+        backgroundColor: '#eeeeee', // Header background color
+        height: Platform.OS === 'ios' ? 120 : 100, // Adjust height as needed
+      },
+      headerTintColor: '#870721', // Header text color
+      headerTitleStyle: { fontWeight: 'bold' }, // Header title style
+      headerTitleAlign: 'center', // Center the header title
+      headerTitle: props => <LogoTitle {...props} />, // Custom header component
+    }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="home-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Bars"
+        component={BarsScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="beer-outline" color={color} size={size} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
@@ -122,21 +105,42 @@ function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  barsContainer: {
+    flex: 1,
+    backgroundColor: '#f7f7f7', // Screen background color
   },
-  sectionTitle: {
+  homeContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white', // Screen background color
+  },
+  barItem: {
+    backgroundColor: '#870721',
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+    borderRadius: 10,
+    // Shadow properties for both iOS and Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+    // For Android:
+    elevation: 4,
+  },
+  barName: {
     fontSize: 24,
-    fontWeight: '600',
+    fontWeight: '500',
+    color: '#fffae5',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  barAddress: {
+    fontSize: 14,
+    color: '#fffae5',
   },
-  highlight: {
-    fontWeight: '700',
+  barSpecials: {
+    fontSize: 14,
+    color: '#fffae5',
   },
 });
 

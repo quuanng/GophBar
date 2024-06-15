@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, View, FlatList, Image, Platform } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View, FlatList, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
@@ -10,28 +10,39 @@ enableScreens();
 
 // Dummy data for bars
 const barsData = [
-  { id: '1', name: "Sally's Saloon", address: '700 SE Washington Ave, Minneapolis, MN 55414', specials: 'Happy Hour: 5-7 PM' },
-  { id: '2', name: 'Blarney Pub & Grill', address: '412 14th Ave SE, Minneapolis, MN 55414', specials: '2-for-1 Cocktails: 6-8 PM' },
-  { id: '3', name: 'Kollege Klub Dinkytown', address: '1301 4th St SE, Minneapolis, MN 55414', specials: 'Discount Beers: All Day' },
-  { id: '4', name: 'Burrito Loco', address: '418 13th Ave SE, Minneapolis, MN 55414', specials: 'Discount Beers: All Day' },
+  { id: '1', name: "Sally's Saloon", address: '700 SE Washington Ave, Minneapolis, MN 55414', specials: ['Happy Hour: 5-7 PM'] },
+  { id: '2', name: 'Blarney Pub & Grill', address: '412 14th Ave SE, Minneapolis, MN 55414', specials: ['2-for-1 Cocktails: 6-8 PM'] },
+  { id: '3', name: 'Kollege Klub Dinkytown', address: '1301 4th St SE, Minneapolis, MN 55414', specials: ['Discount Beers: All Day'] },
+  { id: '4', name: 'Burrito Loco', address: '418 13th Ave SE, Minneapolis, MN 55414', specials: ['Discount Beers: All Day'] },
 ];
 
-function BarItem({ name, address, specials }) {
+interface Bar {
+  id: string;
+  name: string;
+  address: string;
+  specials: string[];
+  // add other properties as needed
+}
+
+const BarItem: React.FC<{ bar: Bar }> = ({ bar }) => {
+  const { name, address, specials } = bar;
   return (
     <View style={styles.barItem}>
       <Text style={styles.barName}>{name}</Text>
       <Text style={styles.barAddress}>{address}</Text>
-      <Text style={styles.barSpecials}>{specials}</Text>
+      {specials.map((special, index) => (
+        <Text key={index} style={styles.barSpecials}>{special}</Text>
+      ))}
     </View>
   );
-}
+};
 
 function BarsScreen() {
   return (
     <SafeAreaView style={styles.barsContainer}>
       <FlatList
         data={barsData}
-        renderItem={({ item }) => <BarItem name={item.name} address={item.address} specials={item.specials} />}
+        renderItem={({ item }) => <BarItem bar={item} />}
         keyExtractor={item => item.id}
       />
     </SafeAreaView>
@@ -67,18 +78,18 @@ const Tab = createBottomTabNavigator();
 function MainTabs() {
   return (
     <Tab.Navigator
-    screenOptions={{
-      tabBarActiveTintColor: '#870721', // Active tab color
-      tabBarInactiveTintColor: 'grey', // Inactive tab color
-      tabBarStyle: { backgroundColor: '#eeeeee' }, // Tab bar background color
-      headerStyle: { 
-        backgroundColor: '#eeeeee', // Header background color
-        height: Platform.OS === 'ios' ? 120 : 100, // Adjust height as needed
-      },
-      headerTintColor: '#870721', // Header text color
-      headerTitleStyle: { fontWeight: 'bold' }, // Header title style
-      headerTitleAlign: 'center', // Center the header title
-    }}
+      screenOptions={{
+        tabBarActiveTintColor: '#870721', // Active tab color
+        tabBarInactiveTintColor: 'grey', // Inactive tab color
+        tabBarStyle: { backgroundColor: '#eeeeee' }, // Tab bar background color
+        headerStyle: {
+          backgroundColor: '#eeeeee', // Header background color
+          height: Platform.OS === 'ios' ? 140 : 90, // Adjust height as needed
+        },
+        headerTintColor: '#870721', // Header text color
+        headerTitleStyle: { fontWeight: 'bold' }, // Header title style
+        headerTitleAlign: 'center', // Center the header title
+      }}
     >
       <Tab.Screen
         name="Explore"

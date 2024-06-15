@@ -1,3 +1,4 @@
+// App.tsx
 import React from 'react';
 import { SafeAreaView, StyleSheet, Text, View, FlatList, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -21,7 +22,6 @@ interface Bar {
   name: string;
   address: string;
   specials: string[];
-  // add other properties as needed
 }
 
 const BarItem: React.FC<{ bar: Bar }> = ({ bar }) => {
@@ -95,7 +95,7 @@ function MainTabs() {
         name="Explore"
         component={ExploreScreen}
         options={{
-          headerTitle: props => <ExploreHeader {...props} />,
+          headerTitle: () => <ExploreHeader />,
           tabBarIcon: ({ color, size }) => (
             <Icon name="compass-outline" color={color} size={size} />
           ),
@@ -105,7 +105,7 @@ function MainTabs() {
         name="Bars"
         component={BarsScreen}
         options={{
-          headerTitle: props => <BarsHeader {...props} />,
+          headerTitle: () => <BarsHeader />,
           tabBarIcon: ({ color, size }) => (
             <Icon name="beer-outline" color={color} size={size} />
           ),
@@ -115,7 +115,7 @@ function MainTabs() {
         name="Map View"
         component={MapViewScreen}
         options={{
-          headerTitle: props => <MapViewHeader {...props} />,
+          headerTitle: () => <MapViewHeader />,
           tabBarIcon: ({ color, size }) => (
             <Icon name="navigate-circle-outline" color={color} size={size} />
           ),
@@ -125,7 +125,7 @@ function MainTabs() {
         name="Settings"
         component={SettingsScreen}
         options={{
-          headerTitle: props => <SettingsHeader {...props} />,
+          headerTitle: () => <SettingsHeader />,
           tabBarIcon: ({ color, size }) => (
             <Icon name="cog-outline" color={color} size={size} />
           ),

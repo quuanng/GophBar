@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { ExploreHeader, BarsHeader, MapViewHeader, SettingsHeader } from './Headers';
 
 enableScreens();
 
@@ -37,25 +38,31 @@ function BarsScreen() {
   );
 }
 
-function HomeScreen() {
+function ExploreScreen() {
   return (
-    <View style={styles.homeContainer}>
-      <Text>Home!</Text>
+    <View style={styles.exploreContainer}>
+      <Text>Explore!</Text>
+    </View>
+  );
+}
+
+function MapViewScreen() {
+  return (
+    <View style={styles.mapViewContainer}>
+      <Text>Map View!</Text>
+    </View>
+  );
+}
+
+function SettingsScreen() {
+  return (
+    <View style={styles.settingsContainer}>
+      <Text>Settings!</Text>
     </View>
   );
 }
 
 const Tab = createBottomTabNavigator();
-
-function LogoTitle() {
-  return (
-    <Image
-      style={{ width: 200, height: 80, alignSelf: 'center' }}
-      source={require('./cartman.png')}
-      resizeMode="contain"
-    />
-  );
-}
 
 function MainTabs() {
   return (
@@ -71,15 +78,15 @@ function MainTabs() {
       headerTintColor: '#870721', // Header text color
       headerTitleStyle: { fontWeight: 'bold' }, // Header title style
       headerTitleAlign: 'center', // Center the header title
-      headerTitle: props => <LogoTitle {...props} />, // Custom header component
     }}
     >
       <Tab.Screen
-        name="Home"
-        component={HomeScreen}
+        name="Explore"
+        component={ExploreScreen}
         options={{
+          headerTitle: props => <ExploreHeader {...props} />,
           tabBarIcon: ({ color, size }) => (
-            <Icon name="home-outline" color={color} size={size} />
+            <Icon name="compass-outline" color={color} size={size} />
           ),
         }}
       />
@@ -87,8 +94,29 @@ function MainTabs() {
         name="Bars"
         component={BarsScreen}
         options={{
+          headerTitle: props => <BarsHeader {...props} />,
           tabBarIcon: ({ color, size }) => (
             <Icon name="beer-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Map View"
+        component={MapViewScreen}
+        options={{
+          headerTitle: props => <MapViewHeader {...props} />,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="navigate-circle-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          headerTitle: props => <SettingsHeader {...props} />,
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="cog-outline" color={color} size={size} />
           ),
         }}
       />
@@ -109,7 +137,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f7f7f7', // Screen background color
   },
-  homeContainer: {
+  exploreContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white', // Screen background color
+  },
+  mapViewContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white', // Screen background color
+  },
+  settingsContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -136,11 +176,11 @@ const styles = StyleSheet.create({
   },
   barAddress: {
     fontSize: 14,
-    color: '#fffae5',
+    color: '#dad6c6',
   },
   barSpecials: {
     fontSize: 14,
-    color: '#fffae5',
+    color: '#dad6c6',
   },
 });
 

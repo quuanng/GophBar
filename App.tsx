@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ExploreHeader, BarsHeader, MapViewHeader, SettingsHeader } from './Headers';
+import BarsScreen from './BarsScreen';
 
 enableScreens();
 
@@ -37,7 +38,7 @@ const BarItem: React.FC<{ bar: Bar }> = ({ bar }) => {
   );
 };
 
-function BarsScreen() {
+/*function BarsScreen() {
   return (
     <SafeAreaView style={styles.barsContainer}>
       <FlatList
@@ -47,7 +48,7 @@ function BarsScreen() {
       />
     </SafeAreaView>
   );
-}
+}*/
 
 function ExploreScreen() {
   return (

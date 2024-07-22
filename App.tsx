@@ -10,14 +10,6 @@ import BarsScreen from './BarsScreen';
 
 enableScreens();
 
-// Dummy data for bars
-const barsData = [
-  { id: '1', name: "Sally's Saloon", address: '700 SE Washington Ave, Minneapolis, MN 55414', specials: ['Happy Hour: 5-7 PM'] },
-  { id: '2', name: 'Blarney Pub & Grill', address: '412 14th Ave SE, Minneapolis, MN 55414', specials: ['2-for-1 Cocktails: 6-8 PM'] },
-  { id: '3', name: 'Kollege Klub Dinkytown', address: '1301 4th St SE, Minneapolis, MN 55414', specials: ['Discount Beers: All Day'] },
-  { id: '4', name: 'Burrito Loco', address: '418 13th Ave SE, Minneapolis, MN 55414', specials: ['Discount Beers: All Day'] },
-];
-
 interface Bar {
   id: string;
   name: string;
@@ -37,18 +29,6 @@ const BarItem: React.FC<{ bar: Bar }> = ({ bar }) => {
     </View>
   );
 };
-
-/*function BarsScreen() {
-  return (
-    <SafeAreaView style={styles.barsContainer}>
-      <FlatList
-        data={barsData}
-        renderItem={({ item }) => <BarItem bar={item} />}
-        keyExtractor={item => item.id}
-      />
-    </SafeAreaView>
-  );
-}*/
 
 function ExploreScreen() {
   return (

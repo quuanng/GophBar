@@ -8,7 +8,7 @@ interface Bar {
   id: string;
   name: string;
   address: string;
-  specials: string[];
+  happyHour: string; // Changed from specials array to happyHour string
   hours?: {
     open: string;
     close: string;
@@ -30,6 +30,14 @@ const isOpen = (open: string, close: string) => {
   return currentTimeMinutes >= openTimeMinutes && currentTimeMinutes < closeTimeMinutes;
 };
 
+// Dummy specials
+const dummySpecials = [
+  "Happy Hour: 5pm - 7pm",
+  "Buy 1 Get 1 Free Cocktails",
+  "50% off Appetizers",
+  "Live Music Fridays"
+];
+
 // Dummy menu items
 const dummyMenuItems = [
   { name: "Burger", price: "$10" },
@@ -40,7 +48,7 @@ const dummyMenuItems = [
 
 // BarItem component to display each bar's information
 const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expanded: boolean }> = ({ bar, currentTime, onPress, expanded }) => {
-  const { name, address, specials, hours } = bar;
+  const { name, address, happyHour, hours } = bar;
   const barIsOpen = hours ? isOpen(hours.open, hours.close) : false;
 
   return (
@@ -48,9 +56,7 @@ const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expa
       <View style={styles.barInfo}>
         <Text style={styles.barName}>{name}</Text>
         <Text style={styles.barAddress}>{address}</Text>
-        {specials.map((special, index) => (
-          <Text key={index} style={styles.barSpecials}>{special}</Text>
-        ))}
+        <Text style={styles.barHappyHour}>Happy Hour: {happyHour}</Text>
         {hours && (
           <Text style={styles.barHours}>
             Hours: {hours.open} - {hours.close}
@@ -63,6 +69,11 @@ const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expa
       />
       {expanded && (
         <View style={styles.expandedInfo}>
+          <Text style={styles.sectionHeader}>Specials</Text>
+          {dummySpecials.map((special, index) => (
+            <Text key={index} style={styles.specialItemText}>{special}</Text>
+          ))}
+          <Text style={styles.sectionHeader}>Menu</Text>
           {dummyMenuItems.map((item, index) => (
             <Text key={index} style={styles.menuItemText}>{item.name} - {item.price}</Text>
           ))}
@@ -92,7 +103,7 @@ const BarsScreen: React.FC = () => {
               id: doc.id,
               name: data.name,
               address: data.address,
-              specials: data.specials,
+              happyHour: data.happyHour, // Changed from specials to happyHour
               hours: data.hours || { open: '', close: '' }, // Fallback if hours is undefined
             } as Bar;
           });
@@ -194,7 +205,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#dad6c6',
   },
-  barSpecials: {
+  barHappyHour: {
     fontSize: 12,
     color: '#dad6c6',
   },
@@ -212,13 +223,27 @@ const styles = StyleSheet.create({
   },
   expandedInfo: {
     marginTop: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#60081A",
     borderRadius: 5,
     padding: 10,
   },
+  sectionHeader: {
+    fontSize: 18,
+    color: '#ffdd67',
+    fontWeight: '600',
+    marginBottom: 5,
+  },
+  specialItemText: {
+    fontSize: 16,
+    color: '#fffae5',
+    fontWeight: '300',
+    marginBottom: 5,
+  },
   menuItemText: {
     fontSize: 16,
-    color: '#333333',
+    color: '#fffae5',
+    fontWeight: '300',
+    marginBottom: 5,
   },
 });
 

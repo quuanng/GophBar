@@ -10,26 +10,6 @@ import BarsScreen from './BarsScreen';
 
 enableScreens();
 
-interface Bar {
-  id: string;
-  name: string;
-  address: string;
-  specials: string[];
-}
-
-const BarItem: React.FC<{ bar: Bar }> = ({ bar }) => {
-  const { name, address, specials } = bar;
-  return (
-    <View style={styles.barItem}>
-      <Text style={styles.barName}>{name}</Text>
-      <Text style={styles.barAddress}>{address}</Text>
-      {specials.map((special, index) => (
-        <Text key={index} style={styles.barSpecials}>{special}</Text>
-      ))}
-    </View>
-  );
-};
-
 function ExploreScreen() {
   return (
     <View style={styles.exploreContainer}>

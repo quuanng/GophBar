@@ -12,9 +12,15 @@ interface Bar {
     open: string;
     close: string;
   };
-  specials: string[];
+  specials: { [key: string]: string[] };
   menu: { name: string; price: string }[];
 }
+
+const getDayOfWeek = () => {
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const currentDayIndex = new Date().getDay();
+  return days[currentDayIndex];
+};
 
 const isOpen = (open: string, close: string) => {
   const currentTime = new Date();
@@ -61,7 +67,7 @@ const BarsScreen: React.FC = () => {
               address: data.address,
               happyHour: data.happyHour,
               hours: data.hours || { open: '', close: '' },
-              specials: data.specials || [],
+              specials: data.specials || {},
               menu: data.menu || []
             } as Bar;
           });
@@ -107,6 +113,8 @@ const BarsScreen: React.FC = () => {
     );
   }
 
+  const dayOfWeek = getDayOfWeek();
+
   return (
     <SafeAreaView style={styles.barsContainer}>
       <FlatList
@@ -117,6 +125,7 @@ const BarsScreen: React.FC = () => {
             currentTime={currentTime}
             onPress={() => handlePressBarItem(item.id)}
             expanded={!!expandedBars[item.id]}
+            dayOfWeek={dayOfWeek}
           />
         )}
         keyExtractor={item => item.id}
@@ -125,7 +134,7 @@ const BarsScreen: React.FC = () => {
   );
 };
 
-const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expanded: boolean }> = ({ bar, currentTime, onPress, expanded }) => {
+const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expanded: boolean; dayOfWeek: string }> = ({ bar, currentTime, onPress, expanded, dayOfWeek }) => {
   const { name, address, happyHour, hours, specials, menu } = bar;
   const barIsOpen = hours ? isOpen(hours.open, hours.close) : false;
 
@@ -148,9 +157,13 @@ const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expa
       {expanded && (
         <View style={styles.expandedInfo}>
           <Text style={styles.sectionHeader}>Specials</Text>
-          {specials.map((special, index) => (
-            <Text key={index} style={styles.specialItemText}>{special}</Text>
-          ))}
+          {specials[dayOfWeek] && specials[dayOfWeek].length > 0 ? (
+            specials[dayOfWeek].map((special, index) => (
+              <Text key={index} style={styles.specialItemText}>{special}</Text>
+            ))
+          ) : (
+            <Text style={styles.noSpecialsText}>No specials today.</Text>
+          )}
           <Text style={styles.sectionHeader}>Some Menu Items</Text>
           {menu.map((item, index) => (
             <Text key={index} style={styles.menuItemText}>{item.name} - {item.price}</Text>
@@ -214,7 +227,7 @@ const styles = StyleSheet.create({
   },
   expandedInfo: {
     marginTop: 10,
-    backgroundColor: "#60081A",
+    backgroundColor: '#60081A',
     borderRadius: 5,
     padding: 10,
   },
@@ -230,12 +243,18 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     marginBottom: 5,
   },
-  menuItemText: {
+  noSpecialsText: {
     fontSize: 16,
     color: '#fffae5',
     fontWeight: '300',
     marginBottom: 5,
   },
-});
-
-export default BarsScreen;
+  menuItemText: {
+    fontSize: 16,
+    color: '#fffae5',
+    fontWeight: '300',
+    marginBottom: 5,
+    },
+  });
+    
+    export default BarsScreen;

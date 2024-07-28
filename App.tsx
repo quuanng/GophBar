@@ -1,12 +1,13 @@
 // App.tsx
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, View, FlatList, Platform } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { ExploreHeader, BarsHeader, MapViewHeader, SettingsHeader } from './Headers';
+import { ExploreHeader, BarsHeader, PollHeader, SettingsHeader } from './Headers';
 import BarsScreen from './BarsScreen';
+import PollScreen from './PollScreen';
 
 enableScreens();
 
@@ -14,14 +15,6 @@ function ExploreScreen() {
   return (
     <View style={styles.exploreContainer}>
       <Text>Explore!</Text>
-    </View>
-  );
-}
-
-function MapViewScreen() {
-  return (
-    <View style={styles.mapViewContainer}>
-      <Text>Map View!</Text>
     </View>
   );
 }
@@ -40,16 +33,16 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#870721', // Active tab color
-        tabBarInactiveTintColor: 'grey', // Inactive tab color
-        tabBarStyle: { backgroundColor: '#eeeeee' }, // Tab bar background color
+        tabBarActiveTintColor: '#870721',
+        tabBarInactiveTintColor: 'grey',
+        tabBarStyle: { backgroundColor: '#eeeeee' },
         headerStyle: {
-          backgroundColor: '#eeeeee', // Header background color
-          height: Platform.OS === 'ios' ? 140 : 90, // Adjust height as needed
+          backgroundColor: '#eeeeee',
+          height: Platform.OS === 'ios' ? 140 : 90,
         },
-        headerTintColor: '#870721', // Header text color
-        headerTitleStyle: { fontWeight: 'bold' }, // Header title style
-        headerTitleAlign: 'center', // Center the header title
+        headerTintColor: '#870721',
+        headerTitleStyle: { fontWeight: 'bold' },
+        headerTitleAlign: 'center',
       }}
     >
       <Tab.Screen
@@ -73,12 +66,12 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="Map View"
-        component={MapViewScreen}
+        name="Poll"
+        component={PollScreen}
         options={{
-          headerTitle: () => <MapViewHeader />,
+          headerTitle: () => <PollHeader />,
           tabBarIcon: ({ color, size }) => (
-            <Icon name="navigate-circle-outline" color={color} size={size} />
+            <Icon name="bar-chart-outline" color={color} size={size} />
           ),
         }}
       />
@@ -105,54 +98,17 @@ function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  barsContainer: {
-    flex: 1,
-    backgroundColor: '#f7f7f7', // Screen background color
-  },
   exploreContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white', // Screen background color
-  },
-  mapViewContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white', // Screen background color
+    backgroundColor: 'white',
   },
   settingsContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white', // Screen background color
-  },
-  barItem: {
-    backgroundColor: '#870721',
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    borderRadius: 10,
-    // Shadow properties for both iOS and Android
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
-    // For Android:
-    elevation: 4,
-  },
-  barName: {
-    fontSize: 24,
-    fontWeight: '500',
-    color: '#fffae5',
-  },
-  barAddress: {
-    fontSize: 14,
-    color: '#dad6c6',
-  },
-  barSpecials: {
-    fontSize: 14,
-    color: '#dad6c6',
+    backgroundColor: 'white',
   },
 });
 

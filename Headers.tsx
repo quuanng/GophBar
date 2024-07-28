@@ -21,7 +21,7 @@ function BarsHeader() {
   );
 }
 
-function MapViewHeader() {
+function PollHeader() {
     return (
       <Image
         style={{ width: 200, height: 80, alignSelf: 'center' }}
@@ -41,4 +41,4 @@ function MapViewHeader() {
     );
   }
 
-export { ExploreHeader, BarsHeader, MapViewHeader, SettingsHeader };
+export { ExploreHeader, BarsHeader, PollHeader, SettingsHeader };

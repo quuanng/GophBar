@@ -164,7 +164,7 @@ const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expa
           ) : (
             <Text style={styles.noSpecialsText}>No specials today.</Text>
           )}
-          <Text style={styles.sectionHeader}>Some Menu Items</Text>
+          <Text style={styles.sectionHeader}>Menu Suggestion of the Week</Text>
           {menu.map((item, index) => (
             <Text key={index} style={styles.menuItemText}>{item.name} - {item.price}</Text>
           ))}
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     position: 'absolute',
-    top: 10,
+    top: 1,
     right: 10,
   },
   expandedInfo: {

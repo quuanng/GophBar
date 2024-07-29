@@ -6,20 +6,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ExploreHeader, BarsHeader, PollHeader, SettingsHeader } from './Headers';
+import ExploreScreen from './screens/ExploreScreen';
 import BarsScreen from './screens/BarsScreen';
 import PollScreen from './screens/PollScreen';
 import SettingsScreen from './screens/SettingsScreen';
 
 enableScreens();
-
-function ExploreScreen() {
-  return (
-    <View style={styles.exploreContainer}>
-      <Text>Explore Page</Text>
-      <Text>Coming soon!</Text>
-    </View>
-  );
-}
 
 const Tab = createBottomTabNavigator();
 

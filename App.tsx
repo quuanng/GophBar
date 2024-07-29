@@ -6,23 +6,17 @@ import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ExploreHeader, BarsHeader, PollHeader, SettingsHeader } from './Headers';
-import BarsScreen from './BarsScreen';
-import PollScreen from './PollScreen';
+import BarsScreen from './screens/BarsScreen';
+import PollScreen from './screens/PollScreen';
+import SettingsScreen from './screens/SettingsScreen';
 
 enableScreens();
 
 function ExploreScreen() {
   return (
     <View style={styles.exploreContainer}>
-      <Text>Explore!</Text>
-    </View>
-  );
-}
-
-function SettingsScreen() {
-  return (
-    <View style={styles.settingsContainer}>
-      <Text>Settings!</Text>
+      <Text>Explore Page</Text>
+      <Text>Coming soon!</Text>
     </View>
   );
 }

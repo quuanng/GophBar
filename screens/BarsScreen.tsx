@@ -151,7 +151,7 @@ const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expa
         )}
       </View>
       <Image
-        source={barIsOpen ? require('./pngs/open.png') : require('./pngs/closed.png')}
+        source={barIsOpen ? require('../pngs/open.png') : require('../pngs/closed.png')}
         style={styles.statusImage}
       />
       {expanded && (

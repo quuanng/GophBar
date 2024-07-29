@@ -46,13 +46,14 @@ const PollScreen = () => {
       if (pollDoc.exists) {
         const pollData = pollDoc.data();
         const newVotes = {
-          '1': pollData?.bar1.votes || 0,
-          '2': pollData?.bar2.votes || 0,
-          '3': pollData?.bar3.votes || 0,
-          '4': pollData?.bar4.votes || 0,
+          '1': pollData?.bar1?.votes || 0,
+          '2': pollData?.bar2?.votes || 0,
+          '3': pollData?.bar3?.votes || 0,
+          '4': pollData?.bar4?.votes || 0,
         };
         setVotes(newVotes);
-        setTotalVotes(Object.values(newVotes).reduce((a, b) => a + b, 0));
+        const newTotalVotes = Object.values(newVotes).reduce((a, b) => a + b, 0);
+        setTotalVotes(newTotalVotes);
 
         const deviceId = DeviceInfo.getUniqueId();
         const storedData = await AsyncStorage.getItem(`selectedBar_${deviceId}`);
@@ -110,6 +111,8 @@ const PollScreen = () => {
     await AsyncStorage.removeItem(`selectedBar_${deviceId}`);
     setSelectedBar(null);
     setShowResults(false);
+    setVotes({ '1': 0, '2': 0, '3': 0, '4': 0 });
+    setTotalVotes(0);
   };
 
   const handleVote = async (barId: string) => {
@@ -129,7 +132,7 @@ const PollScreen = () => {
       if (selectedBar) {
         pollData[`bar${selectedBar}`].votes -= 1;
       } else {
-        setTotalVotes(totalVotes + 1);
+        setTotalVotes((prevTotal) => prevTotal + 1);
       }
 
       pollData[`bar${barId}`].votes += 1;
@@ -142,13 +145,19 @@ const PollScreen = () => {
 
       if (selectedBar) {
         newVotes[selectedBar] -= 1;
-      } else {
-        setTotalVotes(totalVotes + 1);
       }
 
       newVotes[barId] += 1;
 
       return newVotes;
+    });
+
+    setTotalVotes((prevTotal) => {
+      if (selectedBar) {
+        return prevTotal;
+      } else {
+        return prevTotal + 1;
+      }
     });
 
     setSelectedBar(barId);
@@ -170,7 +179,7 @@ const PollScreen = () => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.countdown}>Poll Resets in: {timeRemaining}</Text>
       <View style={styles.pollContainer}>
-        <Text style={styles.title}>Which bar do you plan to go to?</Text>
+        <Text style={styles.title}>What bar today?</Text>
         {bars.map((bar) => (
           <TouchableOpacity
             key={bar.id}
@@ -242,7 +251,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#ffdd67',
-  },
-});
+    },
+  });
 
-export default PollScreen;
+  export default PollScreen;

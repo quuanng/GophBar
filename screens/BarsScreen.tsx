@@ -49,7 +49,7 @@ const formatTime = (time: string) => {
 };
 
 const BarsScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const { effectiveTheme } = useTheme();
   const [bars, setBars] = useState<Bar[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,16 +101,16 @@ const BarsScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.loadingContainer, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
-        <Text style={theme === 'dark' ? styles.darkText : styles.lightText}>Loading...</Text>
+      <SafeAreaView style={[styles.loadingContainer, effectiveTheme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
+        <Text style={effectiveTheme=== 'dark' ? styles.darkText : styles.lightText}>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={[styles.loadingContainer, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
-        <Text style={theme === 'dark' ? styles.darkText : styles.lightText}>{error}</Text>
+      <SafeAreaView style={[styles.loadingContainer, effectiveTheme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
+        <Text style={effectiveTheme === 'dark' ? styles.darkText : styles.lightText}>{error}</Text>
       </SafeAreaView>
     );
   }
@@ -118,7 +118,7 @@ const BarsScreen: React.FC = () => {
   const dayOfWeek = getDayOfWeek();
 
   return (
-    <SafeAreaView style={[styles.barsContainer, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
+    <SafeAreaView style={[styles.barsContainer, effectiveTheme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
       <FlatList
         data={bars}
         renderItem={({ item }) => (
@@ -137,18 +137,18 @@ const BarsScreen: React.FC = () => {
 };
 
 const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expanded: boolean; dayOfWeek: string }> = ({ bar, currentTime, onPress, expanded, dayOfWeek }) => {
-  const { theme } = useTheme();
+  const { effectiveTheme } = useTheme();
   const { name, address, happyHour, hours, specials, menu } = bar;
   const barIsOpen = hours ? isOpen(hours.open, hours.close) : false;
 
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.barItem, theme === 'dark' ? styles.darkBarItem : styles.lightBarItem]} activeOpacity={0.8}>
+    <TouchableOpacity onPress={onPress} style={[styles.barItem, effectiveTheme === 'dark' ? styles.darkBarItem : styles.lightBarItem]} activeOpacity={0.8}>
       <View style={styles.barInfo}>
-        <Text style={[styles.barName, theme === 'dark' ? styles.darkText : styles.lightText]}>{name}</Text>
-        <Text style={[styles.barAddress, theme === 'dark' ? styles.darkText : styles.lightText]}>{address}</Text>
-        <Text style={[styles.barHappyHour, theme === 'dark' ? styles.darkText : styles.lightText]}>Happy Hour: {happyHour}</Text>
+        <Text style={[styles.barName, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>{name}</Text>
+        <Text style={[styles.barAddress, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>{address}</Text>
+        <Text style={[styles.barHappyHour, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>Happy Hour: {happyHour}</Text>
         {hours && (
-          <Text style={[styles.barHours, theme === 'dark' ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.barHours, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
             Hours: {formatTime(hours.open)} - {formatTime(hours.close)}
           </Text>
         )}
@@ -158,18 +158,18 @@ const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expa
         style={styles.statusImage}
       />
       {expanded && (
-        <View style={[styles.expandedInfo, theme === 'dark' ? styles.darkExpandedInfo : styles.lightExpandedInfo]}>
-          <Text style={[styles.sectionHeader, theme === 'dark' ? styles.darkText : styles.lightText]}>Specials</Text>
+        <View style={[styles.expandedInfo, effectiveTheme === 'dark' ? styles.darkExpandedInfo : styles.lightExpandedInfo]}>
+          <Text style={[styles.sectionHeader, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>Specials</Text>
           {specials[dayOfWeek] && specials[dayOfWeek].length > 0 ? (
             specials[dayOfWeek].map((special, index) => (
-              <Text key={index} style={[styles.specialItemText, theme === 'dark' ? styles.darkText : styles.lightText]}>{special}</Text>
+              <Text key={index} style={[styles.specialItemText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>{special}</Text>
             ))
           ) : (
-            <Text style={[styles.noSpecialsText, theme === 'dark' ? styles.darkText : styles.lightText]}>No specials today.</Text>
+            <Text style={[styles.noSpecialsText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>No specials today.</Text>
           )}
-          <Text style={[styles.sectionHeader, theme === 'dark' ? styles.darkText : styles.lightText]}>Menu Suggestion of the Week</Text>
+          <Text style={[styles.sectionHeader, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>Menu Suggestion of the Week</Text>
           {menu.map((item, index) => (
-            <Text key={index} style={[styles.menuItemText, theme === 'dark' ? styles.darkText : styles.lightText]}>{item.name} - {item.price}</Text>
+            <Text key={index} style={[styles.menuItemText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>{item.name} - {item.price}</Text>
           ))}
         </View>
       )}

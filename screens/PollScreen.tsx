@@ -27,7 +27,7 @@ const calculateTimeRemaining = () => {
 };
 
 const PollScreen = () => {
-  const { theme } = useTheme();
+  const { effectiveTheme } = useTheme();
   const [selectedBar, setSelectedBar] = useState<string | null>(null);
   const [votes, setVotes] = useState<{ [key: string]: number }>({});
   const [totalVotes, setTotalVotes] = useState(0);
@@ -169,18 +169,18 @@ const PollScreen = () => {
 
     const voteCount = votes[barId] || 0;
     const percentage = totalVotes > 0 ? ((voteCount / totalVotes) * 100).toFixed(2) : '0.00';
-    return <Text style={[styles.votePercentage, theme === 'dark' ? styles.darkText : styles.lightText]}>{percentage}%</Text>;
+    return <Text style={[styles.votePercentage, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>{percentage}%</Text>;
   };
 
   return (
-    <SafeAreaView style={[styles.container, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
-      <Text style={[styles.countdown, theme === 'dark' ? styles.darkText : styles.lightCountdownText]}>Poll Resets in: {timeRemaining}</Text>
-      <View style={[styles.pollContainer, theme === 'dark' ? styles.darkPollContainer : styles.lightPollContainer]}>
+    <SafeAreaView style={[styles.container, effectiveTheme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
+      <Text style={[styles.countdown, effectiveTheme === 'dark' ? styles.darkText : styles.lightCountdownText]}>Poll Resets in: {timeRemaining}</Text>
+      <View style={[styles.pollContainer, effectiveTheme === 'dark' ? styles.darkPollContainer : styles.lightPollContainer]}>
         <Text style={styles.title}>What bar today?</Text>
         {bars.map((bar) => (
           <TouchableOpacity
             key={bar.id}
-            style={[styles.barOption, theme === 'dark' ? styles.darkPollOption : styles.lightPollOption, selectedBar === bar.id && (theme === 'dark' ? styles.darkSelectedOption : styles.lightSelectedOption)]}
+            style={[styles.barOption, effectiveTheme === 'dark' ? styles.darkPollOption : styles.lightPollOption, selectedBar === bar.id && (effectiveTheme === 'dark' ? styles.darkSelectedOption : styles.lightSelectedOption)]}
             onPress={() => handleVote(bar.id)}
           >
             <Text style={styles.barName}>{bar.name}</Text>

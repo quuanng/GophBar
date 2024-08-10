@@ -3,7 +3,7 @@ import { SafeAreaView, View, Text, Switch, TouchableOpacity, StyleSheet, ScrollV
 import { useTheme } from '../ThemeContext';
 
 const SettingsScreen = () => {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, effectiveTheme } = useTheme();
   const [pushNotificationsEnabled, setPushNotificationsEnabled] = React.useState(false);
   const [motivationEnabled, setMotivationEnabled] = React.useState(false);
   const [feedback, setFeedback] = React.useState('');
@@ -12,11 +12,11 @@ const SettingsScreen = () => {
   const toggleMotivation = () => setMotivationEnabled(prevState => !prevState);
 
   return (
-    <SafeAreaView style={[styles.container, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
+    <SafeAreaView style={[styles.container, effectiveTheme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
       <ScrollView>
         {/* Allow Push Notifications */}
         <View style={styles.settingItem}>
-          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.settingText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
             Allow Push Notifications
           </Text>
           <Switch
@@ -27,7 +27,7 @@ const SettingsScreen = () => {
 
         {/* Motivation */}
         <View style={styles.settingItem}>
-          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.settingText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
             Motivation
           </Text>
           <Switch
@@ -38,7 +38,7 @@ const SettingsScreen = () => {
 
         {/* Change Theme */}
         <View style={styles.settingItem}>
-          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.settingText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
             Theme
           </Text>
           <View style={styles.themeOptions}>
@@ -65,13 +65,13 @@ const SettingsScreen = () => {
 
         {/* Feedback Form */}
         <View style={styles.settingItem}>
-          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.settingText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
             Feedback
           </Text>
           <TextInput
-            style={[styles.feedbackInput, theme === 'dark' ? styles.darkInput : styles.lightInput]}
+            style={[styles.feedbackInput, effectiveTheme === 'dark' ? styles.darkInput : styles.lightInput]}
             placeholder="Write your feedback here..."
-            placeholderTextColor={theme === 'dark' ? '#bbb' : '#999'}
+            placeholderTextColor={effectiveTheme === 'dark' ? '#bbb' : '#999'}
             value={feedback}
             onChangeText={setFeedback}
             multiline
@@ -83,16 +83,16 @@ const SettingsScreen = () => {
 
         {/* About and Legal */}
         <View style={styles.settingItem}>
-          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.settingText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
             About and Legal
           </Text>
           <TouchableOpacity style={styles.linkButton}>
-            <Text style={[styles.linkText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+            <Text style={[styles.linkText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
               Terms of Service
             </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.linkButton}>
-            <Text style={[styles.linkText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+            <Text style={[styles.linkText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
               Privacy Policy
             </Text>
           </TouchableOpacity>
@@ -100,7 +100,7 @@ const SettingsScreen = () => {
 
         {/* Rate the App */}
         <View style={styles.settingItem}>
-          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.settingText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
             Rate the App
           </Text>
           <TouchableOpacity style={styles.rateButton}>

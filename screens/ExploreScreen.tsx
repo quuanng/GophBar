@@ -3,12 +3,12 @@ import { SafeAreaView, View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../ThemeContext';
 
 const ExploreScreen = () => {
-  const { theme } = useTheme();
+  const { effectiveTheme } = useTheme();
 
   return (
-    <SafeAreaView style={[styles.container, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
-      <Text style={[styles.title, theme === 'dark' ? styles.darkTitle : styles.lightTitle]}>Explore Page</Text>
-      <Text style={[styles.subtitle, theme === 'dark' ? styles.darkSubtitle : styles.lightSubtitle]}>Coming Soon</Text>
+    <SafeAreaView style={[styles.container, effectiveTheme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
+      <Text style={[styles.title, effectiveTheme === 'dark' ? styles.darkTitle : styles.lightTitle]}>Explore Page</Text>
+      <Text style={[styles.subtitle, effectiveTheme === 'dark' ? styles.darkSubtitle : styles.lightSubtitle]}>Coming Soon</Text>
     </SafeAreaView>
   );
 };

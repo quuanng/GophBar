@@ -17,18 +17,18 @@ enableScreens();
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
-  const { theme } = useTheme();
+  const { effectiveTheme } = useTheme();
 
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#870721',
-        tabBarInactiveTintColor: theme === 'dark' ? '#999' : 'grey',
+        tabBarInactiveTintColor: effectiveTheme === 'dark' ? '#999' : 'grey',
         tabBarStyle: {
-          backgroundColor: theme === 'dark' ? '#282828' : '#eeeeee',
+          backgroundColor: effectiveTheme === 'dark' ? '#282828' : '#eeeeee',
         },
         headerStyle: {
-          backgroundColor: theme === 'dark' ? '#282828' : '#eeeeee',
+          backgroundColor: effectiveTheme === 'dark' ? '#282828' : '#eeeeee',
           height: Platform.OS === 'ios' ? 140 : 90,
         },
         headerTintColor: '#870721',

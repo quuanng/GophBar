@@ -10,7 +10,7 @@ import { ThemeProvider, useTheme } from './ThemeContext';
 import ExploreScreen from './screens/ExploreScreen';
 import BarsScreen from './screens/BarsScreen';
 import PollScreen from './screens/PollScreen';
-import SettingsScreen from './screens/SettingsScreen';
+import SettingsStackNavigator from './SettingsStackNavigator'; // Updated import
 
 enableScreens();
 
@@ -68,7 +68,7 @@ function MainTabs() {
       />
       <Tab.Screen
         name="Settings"
-        component={SettingsScreen}
+        component={SettingsStackNavigator} // Updated to use the stack navigator
         options={{
           headerTitle: () => <SettingsHeader />,
           tabBarIcon: ({ color, size }) => (

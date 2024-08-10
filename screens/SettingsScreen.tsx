@@ -1,15 +1,44 @@
 import React from 'react';
 import { SafeAreaView, View, Text, Switch, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { useTheme } from '../ThemeContext';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
+import RadioButton from '../components/RadioButton';
 
-const SettingsScreen = () => {
+// Define the navigation prop types
+type SettingsStackParamList = {
+  SettingsHome: undefined;
+  TermsOfService: undefined;
+  PrivacyPolicy: undefined;
+};
+
+type SettingsScreenNavigationProp = StackNavigationProp<SettingsStackParamList, 'SettingsHome'>;
+
+const SettingsScreen: React.FC = () => {
   const { theme, setTheme, effectiveTheme } = useTheme();
   const [pushNotificationsEnabled, setPushNotificationsEnabled] = React.useState(false);
   const [motivationEnabled, setMotivationEnabled] = React.useState(false);
   const [feedback, setFeedback] = React.useState('');
+  const [isDevicePreference, setIsDevicePreference] = React.useState(theme === 'device');
+  
+  // Use typed navigation
+  const navigation = useNavigation<SettingsScreenNavigationProp>();
 
   const togglePushNotifications = () => setPushNotificationsEnabled(prevState => !prevState);
   const toggleMotivation = () => setMotivationEnabled(prevState => !prevState);
+
+  const handleThemeChange = (newTheme: 'light' | 'dark') => {
+    setIsDevicePreference(false);
+    setTheme(newTheme);
+  };
+
+  const toggleDevicePreference = () => {
+    const newState = !isDevicePreference;
+    setIsDevicePreference(newState);
+    if (newState) {
+      setTheme('device');
+    }
+  };
 
   return (
     <SafeAreaView style={[styles.container, effectiveTheme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
@@ -42,24 +71,29 @@ const SettingsScreen = () => {
             Theme
           </Text>
           <View style={styles.themeOptions}>
-            <TouchableOpacity
-              style={[styles.themeOption, theme === 'light' && styles.selectedOption]}
-              onPress={() => setTheme('light')}
-            >
-              <Text style={styles.themeText}>Light</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.themeOption, theme === 'dark' && styles.selectedOption]}
-              onPress={() => setTheme('dark')}
-            >
-              <Text style={styles.themeText}>Dark</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.themeOption, theme === 'device' && styles.selectedOption]}
-              onPress={() => setTheme('device')}
-            >
-              <Text style={styles.themeText}>Device Preference</Text>
-            </TouchableOpacity>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={[styles.themeLabel, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>Light</Text>
+              <RadioButton
+                isSelected={effectiveTheme === 'light'}
+                onPress={() => handleThemeChange('light')}
+              />
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={[styles.themeLabel, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>Dark</Text>
+              <RadioButton
+                isSelected={effectiveTheme === 'dark'}
+                onPress={() => handleThemeChange('dark')}
+              />
+            </View>
+          </View>
+          <View style={styles.devicePreferenceContainer}>
+            <Text style={[styles.settingText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
+              Use Device Preference
+            </Text>
+            <Switch
+              value={isDevicePreference}
+              onValueChange={toggleDevicePreference}
+            />
           </View>
         </View>
 
@@ -86,12 +120,12 @@ const SettingsScreen = () => {
           <Text style={[styles.settingText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
             About and Legal
           </Text>
-          <TouchableOpacity style={styles.linkButton}>
+          <TouchableOpacity style={styles.linkButton} onPress={() => navigation.navigate('TermsOfService')}>
             <Text style={[styles.linkText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
               Terms of Service
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.linkButton}>
+          <TouchableOpacity style={styles.linkButton} onPress={() => navigation.navigate('PrivacyPolicy')}>
             <Text style={[styles.linkText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
               Privacy Policy
             </Text>
@@ -140,23 +174,19 @@ const styles = StyleSheet.create({
   },
   themeOptions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  themeOption: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    flex: 1,
+    justifyContent: 'space-around',
     alignItems: 'center',
-    marginHorizontal: 5,
   },
-  selectedOption: {
-    borderColor: '#870721',
-    backgroundColor: '#fddde6',
-  },
-  themeText: {
+  themeLabel: {
     fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 5,
+  },
+  devicePreferenceContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
   },
   feedbackInput: {
     height: 100,

@@ -3,6 +3,7 @@ import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet } from 'react-na
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DeviceInfo from 'react-native-device-info';
+import { useTheme } from '../ThemeContext';
 
 const bars = [
   { id: '1', name: 'Bar One', votes: 0 },
@@ -26,6 +27,7 @@ const calculateTimeRemaining = () => {
 };
 
 const PollScreen = () => {
+  const { theme } = useTheme();
   const [selectedBar, setSelectedBar] = useState<string | null>(null);
   const [votes, setVotes] = useState<{ [key: string]: number }>({});
   const [totalVotes, setTotalVotes] = useState(0);
@@ -51,39 +53,40 @@ const PollScreen = () => {
           '3': pollData?.bar3?.votes || 0,
           '4': pollData?.bar4?.votes || 0,
         };
-        setVotes(newVotes);
         const newTotalVotes = Object.values(newVotes).reduce((a, b) => a + b, 0);
+        setVotes(newVotes);
         setTotalVotes(newTotalVotes);
-
+  
         const deviceId = DeviceInfo.getUniqueId();
         const storedData = await AsyncStorage.getItem(`selectedBar_${deviceId}`);
         const lastReset = pollData?.lastReset?.toDate();
         const now = new Date();
-
+        
+        const resetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 0);
+        if (lastReset < resetTime && now >= resetTime) {
+          await resetPoll();
+          return; // Exit early after reset to prevent setting old data
+        }
+  
         if (storedData) {
           const { barId, time } = JSON.parse(storedData);
           const storedTime = new Date(time);
-
-          // Clear selected bar if the last reset is after the stored time
+  
           if (lastReset > storedTime) {
             await AsyncStorage.removeItem(`selectedBar_${deviceId}`);
             setSelectedBar(null);
-            setShowResults(false); // Hide results after reset
+            setShowResults(false);
           } else {
             setSelectedBar(barId);
             setShowResults(true);
           }
         }
-
-        // Check if reset is needed
-        if (lastReset < new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 0)) {
-          await resetPoll();
-        }
       }
     };
-
+  
     fetchPollData();
   }, []);
+  
 
   const resetPoll = async () => {
     const pollRef = firestore().collection('polls').doc('currentPoll');
@@ -93,20 +96,17 @@ const PollScreen = () => {
       if (pollDoc.exists) {
         const pollData = pollDoc.data();
 
-        // Reset votes
         pollData.bar1.votes = 0;
         pollData.bar2.votes = 0;
         pollData.bar3.votes = 0;
         pollData.bar4.votes = 0;
 
-        // Update lastReset to current time
         pollData.lastReset = new Date();
 
         transaction.update(pollRef, pollData);
       }
     });
 
-    // Clear local storage for all users
     const deviceId = DeviceInfo.getUniqueId();
     await AsyncStorage.removeItem(`selectedBar_${deviceId}`);
     setSelectedBar(null);
@@ -129,17 +129,14 @@ const PollScreen = () => {
   
       const pollData = pollDoc.data();
   
-      // Handle vote decrement if there's a previous selection
       if (selectedBar) {
         pollData[`bar${selectedBar}`].votes -= 1;
       }
   
-      // Handle vote increment for the new selection
       pollData[`bar${barId}`].votes += 1;
   
       transaction.update(pollRef, pollData);
   
-      // Update local state only after transaction success
       setVotes((prevVotes) => {
         const newVotes = { ...prevVotes };
   
@@ -163,29 +160,27 @@ const PollScreen = () => {
       setSelectedBar(barId);
       setShowResults(true);
   
-      // Store the selected bar and timestamp
       await AsyncStorage.setItem(`selectedBar_${deviceId}`, JSON.stringify({ barId, time: currentTime }));
     });
   };
-  
 
   const renderResults = (barId: string) => {
     if (!showResults) return null;
 
     const voteCount = votes[barId] || 0;
     const percentage = totalVotes > 0 ? ((voteCount / totalVotes) * 100).toFixed(2) : '0.00';
-    return <Text style={styles.votePercentage}>{percentage}%</Text>;
+    return <Text style={[styles.votePercentage, theme === 'dark' ? styles.darkText : styles.lightText]}>{percentage}%</Text>;
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.countdown}>Poll Resets in: {timeRemaining}</Text>
-      <View style={styles.pollContainer}>
+    <SafeAreaView style={[styles.container, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
+      <Text style={[styles.countdown, theme === 'dark' ? styles.darkText : styles.lightCountdownText]}>Poll Resets in: {timeRemaining}</Text>
+      <View style={[styles.pollContainer, theme === 'dark' ? styles.darkPollContainer : styles.lightPollContainer]}>
         <Text style={styles.title}>What bar today?</Text>
         {bars.map((bar) => (
           <TouchableOpacity
             key={bar.id}
-            style={[styles.barOption, selectedBar === bar.id && styles.selectedOption]}
+            style={[styles.barOption, theme === 'dark' ? styles.darkPollOption : styles.lightPollOption, selectedBar === bar.id && (theme === 'dark' ? styles.darkSelectedOption : styles.lightSelectedOption)]}
             onPress={() => handleVote(bar.id)}
           >
             <Text style={styles.barName}>{bar.name}</Text>
@@ -200,18 +195,33 @@ const PollScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f7f7f7',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  lightContainer: {
+    backgroundColor: '#f7f7f7',
+  },
+  darkContainer: {
+    backgroundColor: '#303030',
   },
   countdown: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#870721',
     marginBottom: 16,
   },
-  pollContainer: {
+  lightCountdownText: {
+    color: '#870721',
+  },
+  darkCountdownText: {
+    color: '#60081A',
+  },
+  lightPollContainer: {
     backgroundColor: '#870721',
+  },
+  darkPollContainer: {
+    backgroundColor: '#60081A',
+  },
+  pollContainer: {
     padding: 20,
     borderRadius: 10,
     shadowColor: '#000',
@@ -241,8 +251,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 2,
   },
-  selectedOption: {
+  lightPollOption: {
+    backgroundColor: '#870721',
+  },
+  darkPollOption: {
     backgroundColor: '#60081A',
+  },
+  lightSelectedOption: {
+    backgroundColor: '#60081A',
+  },
+  darkSelectedOption: {
+    backgroundColor: '#3a0e16',
   },
   barName: {
     fontSize: 18,
@@ -252,8 +271,13 @@ const styles = StyleSheet.create({
   votePercentage: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#ffdd67',
-    },
-  });
+  },
+  lightText: {
+    color: '#fff',
+  },
+  darkText: {
+    color: '#d0d0d0',
+  },
+});
 
-  export default PollScreen;
+export default PollScreen;

@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { enableScreens } from 'react-native-screens';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ExploreHeader, BarsHeader, PollHeader, SettingsHeader } from './Headers';
+import { ThemeProvider, useTheme } from './ThemeContext';
 import ExploreScreen from './screens/ExploreScreen';
 import BarsScreen from './screens/BarsScreen';
 import PollScreen from './screens/PollScreen';
@@ -16,14 +17,18 @@ enableScreens();
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
+  const { theme } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#870721',
-        tabBarInactiveTintColor: 'grey',
-        tabBarStyle: { backgroundColor: '#eeeeee' },
+        tabBarInactiveTintColor: theme === 'dark' ? '#999' : 'grey',
+        tabBarStyle: {
+          backgroundColor: theme === 'dark' ? '#282828' : '#eeeeee',
+        },
         headerStyle: {
-          backgroundColor: '#eeeeee',
+          backgroundColor: theme === 'dark' ? '#282828' : '#eeeeee',
           height: Platform.OS === 'ios' ? 140 : 90,
         },
         headerTintColor: '#870721',
@@ -77,25 +82,12 @@ function MainTabs() {
 
 function App(): React.JSX.Element {
   return (
-    <NavigationContainer>
-      <MainTabs />
-    </NavigationContainer>
+    <ThemeProvider>
+      <NavigationContainer>
+        <MainTabs />
+      </NavigationContainer>
+    </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  exploreContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-  },
-  settingsContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-  },
-});
 
 export default App;

@@ -1,40 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, Switch, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React from 'react';
+import { SafeAreaView, View, Text, Switch, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
+import { useTheme } from '../ThemeContext';
 
 const SettingsScreen = () => {
-  const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(false);
-  const [motivationEnabled, setMotivationEnabled] = useState(false);
-  const [theme, setTheme] = useState('device'); // 'light', 'dark', or 'device'
-  const [feedback, setFeedback] = useState('');
+  const { theme, setTheme } = useTheme();
+  const [pushNotificationsEnabled, setPushNotificationsEnabled] = React.useState(false);
+  const [motivationEnabled, setMotivationEnabled] = React.useState(false);
+  const [feedback, setFeedback] = React.useState('');
 
-  useEffect(() => {
-    // Load saved theme from AsyncStorage
-    const loadTheme = async () => {
-      const savedTheme = await AsyncStorage.getItem('appTheme');
-      if (savedTheme) {
-        setTheme(savedTheme);
-      }
-    };
-
-    loadTheme();
-  }, []);
-
-  const togglePushNotifications = () => setPushNotificationsEnabled(previousState => !previousState);
-  const toggleMotivation = () => setMotivationEnabled(previousState => !previousState);
-
-  const handleThemeChange = async (newTheme: string) => {
-    setTheme(newTheme);
-    await AsyncStorage.setItem('appTheme', newTheme);
-    // Optionally, you might want to apply the theme globally here
-  };
+  const togglePushNotifications = () => setPushNotificationsEnabled(prevState => !prevState);
+  const toggleMotivation = () => setMotivationEnabled(prevState => !prevState);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
       <ScrollView>
         {/* Allow Push Notifications */}
         <View style={styles.settingItem}>
-          <Text style={styles.settingText}>Allow Push Notifications</Text>
+          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+            Allow Push Notifications
+          </Text>
           <Switch
             value={pushNotificationsEnabled}
             onValueChange={togglePushNotifications}
@@ -43,7 +27,9 @@ const SettingsScreen = () => {
 
         {/* Motivation */}
         <View style={styles.settingItem}>
-          <Text style={styles.settingText}>Motivation</Text>
+          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+            Motivation
+          </Text>
           <Switch
             value={motivationEnabled}
             onValueChange={toggleMotivation}
@@ -52,23 +38,25 @@ const SettingsScreen = () => {
 
         {/* Change Theme */}
         <View style={styles.settingItem}>
-          <Text style={styles.settingText}>Theme</Text>
+          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+            Theme
+          </Text>
           <View style={styles.themeOptions}>
             <TouchableOpacity
               style={[styles.themeOption, theme === 'light' && styles.selectedOption]}
-              onPress={() => handleThemeChange('light')}
+              onPress={() => setTheme('light')}
             >
               <Text style={styles.themeText}>Light</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.themeOption, theme === 'dark' && styles.selectedOption]}
-              onPress={() => handleThemeChange('dark')}
+              onPress={() => setTheme('dark')}
             >
               <Text style={styles.themeText}>Dark</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.themeOption, theme === 'device' && styles.selectedOption]}
-              onPress={() => handleThemeChange('device')}
+              onPress={() => setTheme('device')}
             >
               <Text style={styles.themeText}>Device Preference</Text>
             </TouchableOpacity>
@@ -77,10 +65,13 @@ const SettingsScreen = () => {
 
         {/* Feedback Form */}
         <View style={styles.settingItem}>
-          <Text style={styles.settingText}>Feedback</Text>
+          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+            Feedback
+          </Text>
           <TextInput
-            style={styles.feedbackInput}
+            style={[styles.feedbackInput, theme === 'dark' ? styles.darkInput : styles.lightInput]}
             placeholder="Write your feedback here..."
+            placeholderTextColor={theme === 'dark' ? '#bbb' : '#999'}
             value={feedback}
             onChangeText={setFeedback}
             multiline
@@ -92,18 +83,26 @@ const SettingsScreen = () => {
 
         {/* About and Legal */}
         <View style={styles.settingItem}>
-          <Text style={styles.settingText}>About and Legal</Text>
+          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+            About and Legal
+          </Text>
           <TouchableOpacity style={styles.linkButton}>
-            <Text style={styles.linkText}>Terms of Service</Text>
+            <Text style={[styles.linkText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+              Terms of Service
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.linkButton}>
-            <Text style={styles.linkText}>Privacy Policy</Text>
+            <Text style={[styles.linkText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+              Privacy Policy
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Rate the App */}
         <View style={styles.settingItem}>
-          <Text style={styles.settingText}>Rate the App</Text>
+          <Text style={[styles.settingText, theme === 'dark' ? styles.darkText : styles.lightText]}>
+            Rate the App
+          </Text>
           <TouchableOpacity style={styles.rateButton}>
             <Text style={styles.rateButtonText}>Rate Us</Text>
           </TouchableOpacity>
@@ -116,7 +115,12 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  lightContainer: {
     backgroundColor: '#f7f7f7',
+  },
+  darkContainer: {
+    backgroundColor: '#303030',
   },
   settingItem: {
     padding: 20,
@@ -127,6 +131,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  lightText: {
+    color: '#000',
+  },
+  darkText: {
+    color: '#fff',
   },
   themeOptions: {
     flexDirection: 'row',
@@ -156,6 +166,14 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     textAlignVertical: 'top',
+  },
+  lightInput: {
+    backgroundColor: '#fff',
+    color: '#000',
+  },
+  darkInput: {
+    backgroundColor: '#444',
+    color: '#fff',
   },
   submitButton: {
     backgroundColor: '#870721',

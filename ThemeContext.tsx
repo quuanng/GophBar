@@ -1,52 +1,40 @@
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// ThemeContext.tsx
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Appearance } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type Theme = 'light' | 'dark' | 'device';
-
-interface ThemeContextProps {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-}
-
-export const ThemeContext = createContext<ThemeContextProps>({
-  theme: 'device',
-  setTheme: () => {},
+export const ThemeContext = createContext({
+  theme: 'light',
+  setTheme: (theme: string) => {},
 });
 
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme>('device');
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [theme, setTheme] = useState('light');
 
   useEffect(() => {
     const loadTheme = async () => {
       const savedTheme = await AsyncStorage.getItem('appTheme');
       if (savedTheme) {
-        setThemeState(savedTheme as Theme);
+        setTheme(savedTheme);
       } else {
-        const systemTheme = Appearance.getColorScheme();
-        setThemeState(systemTheme as Theme);
+        // Fallback to device theme if no theme is stored
+        const deviceTheme = Appearance.getColorScheme();
+        setTheme(deviceTheme || 'light');
       }
     };
-
     loadTheme();
+  }, []);
 
-    const listener = Appearance.addChangeListener(({ colorScheme }) => {
-      if (theme === 'device') {
-        setThemeState(colorScheme as Theme);
-      }
-    });
-
-    return () => listener.remove();
-  }, [theme]);
-
-  const setTheme = async (newTheme: Theme) => {
-    setThemeState(newTheme);
+  const handleThemeChange = async (newTheme: string) => {
+    setTheme(newTheme);
     await AsyncStorage.setItem('appTheme', newTheme);
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme: handleThemeChange }}>
       {children}
     </ThemeContext.Provider>
   );
 };
+
+export const useTheme = () => useContext(ThemeContext);

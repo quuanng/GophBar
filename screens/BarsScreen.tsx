@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { SafeAreaView, FlatList, Text, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
+import { useTheme } from '../ThemeContext';
 
 interface Bar {
   id: string;
@@ -48,6 +49,7 @@ const formatTime = (time: string) => {
 };
 
 const BarsScreen: React.FC = () => {
+  const { theme } = useTheme();
   const [bars, setBars] = useState<Bar[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,16 +101,16 @@ const BarsScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <Text>Loading...</Text>
+      <SafeAreaView style={[styles.loadingContainer, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
+        <Text style={theme === 'dark' ? styles.darkText : styles.lightText}>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <Text>{error}</Text>
+      <SafeAreaView style={[styles.loadingContainer, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
+        <Text style={theme === 'dark' ? styles.darkText : styles.lightText}>{error}</Text>
       </SafeAreaView>
     );
   }
@@ -116,7 +118,7 @@ const BarsScreen: React.FC = () => {
   const dayOfWeek = getDayOfWeek();
 
   return (
-    <SafeAreaView style={styles.barsContainer}>
+    <SafeAreaView style={[styles.barsContainer, theme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
       <FlatList
         data={bars}
         renderItem={({ item }) => (
@@ -135,17 +137,18 @@ const BarsScreen: React.FC = () => {
 };
 
 const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expanded: boolean; dayOfWeek: string }> = ({ bar, currentTime, onPress, expanded, dayOfWeek }) => {
+  const { theme } = useTheme();
   const { name, address, happyHour, hours, specials, menu } = bar;
   const barIsOpen = hours ? isOpen(hours.open, hours.close) : false;
 
   return (
-    <TouchableOpacity onPress={onPress} style={styles.barItem} activeOpacity={0.8}>
+    <TouchableOpacity onPress={onPress} style={[styles.barItem, theme === 'dark' ? styles.darkBarItem : styles.lightBarItem]} activeOpacity={0.8}>
       <View style={styles.barInfo}>
-        <Text style={styles.barName}>{name}</Text>
-        <Text style={styles.barAddress}>{address}</Text>
-        <Text style={styles.barHappyHour}>Happy Hour: {happyHour}</Text>
+        <Text style={[styles.barName, theme === 'dark' ? styles.darkText : styles.lightText]}>{name}</Text>
+        <Text style={[styles.barAddress, theme === 'dark' ? styles.darkText : styles.lightText]}>{address}</Text>
+        <Text style={[styles.barHappyHour, theme === 'dark' ? styles.darkText : styles.lightText]}>Happy Hour: {happyHour}</Text>
         {hours && (
-          <Text style={styles.barHours}>
+          <Text style={[styles.barHours, theme === 'dark' ? styles.darkText : styles.lightText]}>
             Hours: {formatTime(hours.open)} - {formatTime(hours.close)}
           </Text>
         )}
@@ -155,18 +158,18 @@ const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expa
         style={styles.statusImage}
       />
       {expanded && (
-        <View style={styles.expandedInfo}>
-          <Text style={styles.sectionHeader}>Specials</Text>
+        <View style={[styles.expandedInfo, theme === 'dark' ? styles.darkExpandedInfo : styles.lightExpandedInfo]}>
+          <Text style={[styles.sectionHeader, theme === 'dark' ? styles.darkText : styles.lightText]}>Specials</Text>
           {specials[dayOfWeek] && specials[dayOfWeek].length > 0 ? (
             specials[dayOfWeek].map((special, index) => (
-              <Text key={index} style={styles.specialItemText}>{special}</Text>
+              <Text key={index} style={[styles.specialItemText, theme === 'dark' ? styles.darkText : styles.lightText]}>{special}</Text>
             ))
           ) : (
-            <Text style={styles.noSpecialsText}>No specials today.</Text>
+            <Text style={[styles.noSpecialsText, theme === 'dark' ? styles.darkText : styles.lightText]}>No specials today.</Text>
           )}
-          <Text style={styles.sectionHeader}>Menu Suggestion of the Week</Text>
+          <Text style={[styles.sectionHeader, theme === 'dark' ? styles.darkText : styles.lightText]}>Menu Suggestion of the Week</Text>
           {menu.map((item, index) => (
-            <Text key={index} style={styles.menuItemText}>{item.name} - {item.price}</Text>
+            <Text key={index} style={[styles.menuItemText, theme === 'dark' ? styles.darkText : styles.lightText]}>{item.name} - {item.price}</Text>
           ))}
         </View>
       )}
@@ -177,15 +180,25 @@ const BarItem: React.FC<{ bar: Bar; currentTime: Date; onPress: () => void; expa
 const styles = StyleSheet.create({
   barsContainer: {
     flex: 1,
+  },
+  lightContainer: {
     backgroundColor: '#f7f7f7',
+  },
+  darkContainer: {
+    backgroundColor: '#303030',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  lightText: {
+    color: '#fff',
+  },
+  darkText: {
+    color: '#d0d0d0',
+  },
   barItem: {
-    backgroundColor: '#870721',
     padding: 20,
     marginVertical: 8,
     marginHorizontal: 16,
@@ -197,13 +210,19 @@ const styles = StyleSheet.create({
     elevation: 4,
     position: 'relative',
   },
+  lightBarItem: {
+    backgroundColor: '#870721',
+  },
+  darkBarItem: {
+    backgroundColor: '#60081A',
+  },
   barInfo: {
     flex: 1,
   },
   barName: {
     fontSize: 24,
     fontWeight: '500',
-    color: '#fffae5',
+    color: '#fff',
   },
   barAddress: {
     fontSize: 12,
@@ -227,34 +246,35 @@ const styles = StyleSheet.create({
   },
   expandedInfo: {
     marginTop: 10,
-    backgroundColor: '#60081A',
     borderRadius: 5,
     padding: 10,
   },
+  lightExpandedInfo: {
+    backgroundColor: '#60081A',
+  },
+  darkExpandedInfo: {
+    backgroundColor: '#3a0e16',
+  },
   sectionHeader: {
     fontSize: 18,
-    color: '#ffdd67',
     fontWeight: '600',
     marginBottom: 5,
   },
   specialItemText: {
     fontSize: 16,
-    color: '#fffae5',
     fontWeight: '300',
     marginBottom: 5,
   },
   noSpecialsText: {
     fontSize: 16,
-    color: '#fffae5',
     fontWeight: '300',
     marginBottom: 5,
   },
   menuItemText: {
     fontSize: 16,
-    color: '#fffae5',
     fontWeight: '300',
     marginBottom: 5,
-    },
-  });
-    
-    export default BarsScreen;
+  },
+});
+
+export default BarsScreen;

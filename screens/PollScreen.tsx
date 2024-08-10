@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DeviceInfo from 'react-native-device-info';
 import { useTheme } from '../ThemeContext';
 
-const bars = [
-  { id: '1', name: 'Bar One', votes: 0 },
-  { id: '2', name: 'Bar Two', votes: 0 },
-  { id: '3', name: 'Bar Three', votes: 0 },
-  { id: '4', name: 'Bar Four', votes: 0 },
-];
+type PollData = {
+  bar1: { name: string; votes: number };
+  bar2: { name: string; votes: number };
+  bar3: { name: string; votes: number };
+  bar4: { name: string; votes: number };
+  lastReset?: FirebaseFirestoreTypes.Timestamp;
+};
+
+const isBarData = (
+  bar: PollData[keyof PollData]
+): bar is { name: string; votes: number } => {
+  return (bar as { name: string; votes: number }).name !== undefined;
+};
 
 const calculateTimeRemaining = () => {
   const now = new Date();
@@ -33,91 +40,115 @@ const PollScreen = () => {
   const [totalVotes, setTotalVotes] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(calculateTimeRemaining());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeRemaining(calculateTimeRemaining());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
+  const [bars, setBars] = useState([
+    { id: '1', name: '', votes: 0 },
+    { id: '2', name: '', votes: 0 },
+    { id: '3', name: '', votes: 0 },
+    { id: '4', name: '', votes: 0 },
+  ]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPollData = async () => {
-      const pollDoc = await firestore().collection('polls').doc('currentPoll').get();
-      if (pollDoc.exists) {
-        const pollData = pollDoc.data();
-        const newVotes = {
-          '1': pollData?.bar1?.votes || 0,
-          '2': pollData?.bar2?.votes || 0,
-          '3': pollData?.bar3?.votes || 0,
-          '4': pollData?.bar4?.votes || 0,
-        };
-        const newTotalVotes = Object.values(newVotes).reduce((a, b) => a + b, 0);
-        setVotes(newVotes);
-        setTotalVotes(newTotalVotes);
+      try {
+        const pollDoc = await firestore().collection('polls').doc('currentPoll').get();
+        if (pollDoc.exists) {
+          const pollData = pollDoc.data() as PollData;
   
-        const deviceId = DeviceInfo.getUniqueId();
-        const storedData = await AsyncStorage.getItem(`selectedBar_${deviceId}`);
-        const lastReset = pollData?.lastReset?.toDate();
-        const now = new Date();
-        
-        const resetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 0);
-        if (lastReset < resetTime && now >= resetTime) {
-          await resetPoll();
-          return; // Exit early after reset to prevent setting old data
-        }
+          if (pollData) {
+            const newBars = bars.map((bar, index) => {
+              const barData = pollData[`bar${index + 1}` as keyof PollData];
+              return {
+                ...bar,
+                name: isBarData(barData) ? barData.name : `Bar ${index + 1}`,
+              };
+            });
   
-        if (storedData) {
-          const { barId, time } = JSON.parse(storedData);
-          const storedTime = new Date(time);
+            const newVotes = newBars.reduce((acc, bar) => {
+              const barData = pollData[`bar${bar.id}` as keyof PollData];
+              acc[bar.id] = isBarData(barData) ? barData.votes : 0;
+              return acc;
+            }, {} as { [key: string]: number });
   
-          if (lastReset > storedTime) {
-            await AsyncStorage.removeItem(`selectedBar_${deviceId}`);
-            setSelectedBar(null);
-            setShowResults(false);
-          } else {
-            setSelectedBar(barId);
-            setShowResults(true);
+            const newTotalVotes = Object.values(newVotes).reduce((a, b) => a + b, 0);
+  
+            setBars(newBars);
+            setVotes(newVotes);
+            setTotalVotes(newTotalVotes);
+  
+            const deviceId = await DeviceInfo.getUniqueId();
+            const storedData = await AsyncStorage.getItem(`selectedBar_${deviceId}`);
+            const lastReset = pollData?.lastReset?.toDate();
+            const now = new Date();
+  
+            const resetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 0);
+            if (lastReset && lastReset < resetTime && now >= resetTime) {
+              await resetPoll();
+              setLoading(false);
+              return; // Exit early after reset to prevent setting old data
+            }
+  
+            if (storedData) {
+              const { barId, time } = JSON.parse(storedData);
+              const storedTime = new Date(time);
+  
+              if (lastReset && lastReset > storedTime) {
+                await AsyncStorage.removeItem(`selectedBar_${deviceId}`);
+                setSelectedBar(null);
+                setShowResults(false);
+              } else {
+                setSelectedBar(barId);
+                setShowResults(true);
+              }
+            }
           }
         }
+      } catch (error) {
+        console.error('Error fetching poll data:', error);
+      } finally {
+        setLoading(false);
       }
     };
   
     fetchPollData();
   }, []);
-  
 
   const resetPoll = async () => {
     const pollRef = firestore().collection('polls').doc('currentPoll');
     await firestore().runTransaction(async (transaction) => {
       const pollDoc = await transaction.get(pollRef);
-
+    
       if (pollDoc.exists) {
-        const pollData = pollDoc.data();
-
-        pollData.bar1.votes = 0;
-        pollData.bar2.votes = 0;
-        pollData.bar3.votes = 0;
-        pollData.bar4.votes = 0;
-
-        pollData.lastReset = new Date();
-
+        const pollData = pollDoc.data() as PollData;
+    
+        bars.forEach(bar => {
+          const barData = pollData[`bar${bar.id}` as keyof PollData];
+          if (barData && isBarData(barData)) {
+            barData.votes = 0;
+          }
+        });
+    
+        pollData.lastReset = new Date() as unknown as FirebaseFirestoreTypes.Timestamp;
+    
         transaction.update(pollRef, pollData);
       }
     });
+    
 
-    const deviceId = DeviceInfo.getUniqueId();
+    const deviceId = await DeviceInfo.getUniqueId();
     await AsyncStorage.removeItem(`selectedBar_${deviceId}`);
     setSelectedBar(null);
     setShowResults(false);
-    setVotes({ '1': 0, '2': 0, '3': 0, '4': 0 });
+    setVotes(bars.reduce((acc, bar) => {
+      acc[bar.id] = 0;
+      return acc;
+    }, {} as { [key: string]: number }));
     setTotalVotes(0);
   };
 
   const handleVote = async (barId: string) => {
     const pollRef = firestore().collection('polls').doc('currentPoll');
-    const deviceId = DeviceInfo.getUniqueId();
+    const deviceId = await DeviceInfo.getUniqueId();
     const currentTime = new Date().toISOString();
   
     await firestore().runTransaction(async (transaction) => {
@@ -127,24 +158,31 @@ const PollScreen = () => {
         throw new Error('Poll does not exist!');
       }
   
-      const pollData = pollDoc.data();
+      const pollData = pollDoc.data() as PollData;
   
-      if (selectedBar) {
-        pollData[`bar${selectedBar}`].votes -= 1;
+      const selectedBarData = pollData[`bar${selectedBar}` as keyof PollData];
+      const newBarData = pollData[`bar${barId}` as keyof PollData];
+  
+      if (selectedBar && selectedBarData && isBarData(selectedBarData)) {
+        selectedBarData.votes -= 1;
       }
   
-      pollData[`bar${barId}`].votes += 1;
+      if (newBarData && isBarData(newBarData)) {
+        newBarData.votes += 1;
+      }
   
       transaction.update(pollRef, pollData);
   
       setVotes((prevVotes) => {
         const newVotes = { ...prevVotes };
   
-        if (selectedBar) {
+        if (selectedBar && selectedBarData && isBarData(selectedBarData)) {
           newVotes[selectedBar] -= 1;
         }
   
-        newVotes[barId] += 1;
+        if (newBarData && isBarData(newBarData)) {
+          newVotes[barId] += 1;
+        }
   
         return newVotes;
       });
@@ -163,7 +201,7 @@ const PollScreen = () => {
       await AsyncStorage.setItem(`selectedBar_${deviceId}`, JSON.stringify({ barId, time: currentTime }));
     });
   };
-
+  
   const renderResults = (barId: string) => {
     if (!showResults) return null;
 
@@ -171,6 +209,14 @@ const PollScreen = () => {
     const percentage = totalVotes > 0 ? ((voteCount / totalVotes) * 100).toFixed(2) : '0.00';
     return <Text style={[styles.votePercentage, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>{percentage}%</Text>;
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, effectiveTheme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
+        <ActivityIndicator size="large" color="#870721" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, effectiveTheme === 'dark' ? styles.darkContainer : styles.lightContainer]}>

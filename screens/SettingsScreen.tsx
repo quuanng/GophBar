@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView, View, Text, Switch, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingsScreen = () => {
   const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(false);
@@ -7,10 +8,26 @@ const SettingsScreen = () => {
   const [theme, setTheme] = useState('device'); // 'light', 'dark', or 'device'
   const [feedback, setFeedback] = useState('');
 
+  useEffect(() => {
+    // Load saved theme from AsyncStorage
+    const loadTheme = async () => {
+      const savedTheme = await AsyncStorage.getItem('appTheme');
+      if (savedTheme) {
+        setTheme(savedTheme);
+      }
+    };
+
+    loadTheme();
+  }, []);
+
   const togglePushNotifications = () => setPushNotificationsEnabled(previousState => !previousState);
   const toggleMotivation = () => setMotivationEnabled(previousState => !previousState);
 
-  const handleThemeChange = (newTheme: string) => setTheme(newTheme);
+  const handleThemeChange = async (newTheme: string) => {
+    setTheme(newTheme);
+    await AsyncStorage.setItem('appTheme', newTheme);
+    // Optionally, you might want to apply the theme globally here
+  };
 
   return (
     <SafeAreaView style={styles.container}>

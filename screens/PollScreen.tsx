@@ -119,53 +119,55 @@ const PollScreen = () => {
     const pollRef = firestore().collection('polls').doc('currentPoll');
     const deviceId = DeviceInfo.getUniqueId();
     const currentTime = new Date().toISOString();
-
+  
     await firestore().runTransaction(async (transaction) => {
       const pollDoc = await transaction.get(pollRef);
-
+  
       if (!pollDoc.exists) {
         throw new Error('Poll does not exist!');
       }
-
+  
       const pollData = pollDoc.data();
-
+  
+      // Handle vote decrement if there's a previous selection
       if (selectedBar) {
         pollData[`bar${selectedBar}`].votes -= 1;
-      } else {
-        setTotalVotes((prevTotal) => prevTotal + 1);
       }
-
+  
+      // Handle vote increment for the new selection
       pollData[`bar${barId}`].votes += 1;
-
+  
       transaction.update(pollRef, pollData);
+  
+      // Update local state only after transaction success
+      setVotes((prevVotes) => {
+        const newVotes = { ...prevVotes };
+  
+        if (selectedBar) {
+          newVotes[selectedBar] -= 1;
+        }
+  
+        newVotes[barId] += 1;
+  
+        return newVotes;
+      });
+  
+      setTotalVotes((prevTotal) => {
+        if (selectedBar) {
+          return prevTotal;
+        } else {
+          return prevTotal + 1;
+        }
+      });
+  
+      setSelectedBar(barId);
+      setShowResults(true);
+  
+      // Store the selected bar and timestamp
+      await AsyncStorage.setItem(`selectedBar_${deviceId}`, JSON.stringify({ barId, time: currentTime }));
     });
-
-    setVotes((prevVotes) => {
-      const newVotes = { ...prevVotes };
-
-      if (selectedBar) {
-        newVotes[selectedBar] -= 1;
-      }
-
-      newVotes[barId] += 1;
-
-      return newVotes;
-    });
-
-    setTotalVotes((prevTotal) => {
-      if (selectedBar) {
-        return prevTotal;
-      } else {
-        return prevTotal + 1;
-      }
-    });
-
-    setSelectedBar(barId);
-    setShowResults(true);
-
-    // Store the selected bar and timestamp
-    await AsyncStorage.setItem(`selectedBar_${deviceId}`, JSON.stringify({ barId, time: currentTime }));
   };
+  
 
   const renderResults = (barId: string) => {
     if (!showResults) return null;

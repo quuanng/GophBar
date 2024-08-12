@@ -1,9 +1,12 @@
-import React from 'react';
-import { SafeAreaView, View, Text, Switch, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, View, Text, Switch, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { useTheme } from '../ThemeContext';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import RadioButton from '../components/RadioButton';
+import firestore from '@react-native-firebase/firestore';
+import DeviceInfo from 'react-native-device-info';
+import moment from 'moment'; // For date formatting
 
 // Define the navigation prop types
 type SettingsStackParamList = {
@@ -16,13 +19,49 @@ type SettingsScreenNavigationProp = StackNavigationProp<SettingsStackParamList, 
 
 const SettingsScreen: React.FC = () => {
   const { theme, setTheme, effectiveTheme } = useTheme();
-  const [pushNotificationsEnabled, setPushNotificationsEnabled] = React.useState(false);
-  const [motivationEnabled, setMotivationEnabled] = React.useState(false);
-  const [feedback, setFeedback] = React.useState('');
-  const [isDevicePreference, setIsDevicePreference] = React.useState(theme === 'device');
+  const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(false);
+  const [motivationEnabled, setMotivationEnabled] = useState(false);
+  const [feedback, setFeedback] = useState('');
+  const [isDevicePreference, setIsDevicePreference] = useState(theme === 'device');
+  const [deviceId, setDeviceId] = useState<string | null>(null);
+  const [hasSubmittedFeedback, setHasSubmittedFeedback] = useState(false);
+  const [loading, setLoading] = useState(true); // Loading state
   
   // Use typed navigation
   const navigation = useNavigation<SettingsScreenNavigationProp>();
+
+  useEffect(() => {
+    // Get the unique device ID when the component mounts
+    const fetchDeviceId = async () => {
+      const id = await DeviceInfo.getUniqueId();
+      setDeviceId(id);
+    };
+
+    fetchDeviceId();
+  }, []);
+
+  useEffect(() => {
+    const checkFeedbackSubmission = async () => {
+      if (!deviceId) return;
+
+      const todayDate = moment().format('YYYY-MM-DD');
+      const feedbackDocs = await firestore()
+        .collection('feedback')
+        .where('device_id', '==', deviceId)
+        .where('date', '==', todayDate)
+        .get();
+
+      if (!feedbackDocs.empty) {
+        setHasSubmittedFeedback(true);
+      }
+
+      setLoading(false); // Set loading to false after checking
+    };
+
+    if (deviceId) {
+      checkFeedbackSubmission();
+    }
+  }, [deviceId]);
 
   const togglePushNotifications = () => setPushNotificationsEnabled(prevState => !prevState);
   const toggleMotivation = () => setMotivationEnabled(prevState => !prevState);
@@ -37,6 +76,42 @@ const SettingsScreen: React.FC = () => {
     setIsDevicePreference(newState);
     if (newState) {
       setTheme('device');
+    }
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (feedback.trim() === '') {
+      Alert.alert('Error', 'Feedback cannot be empty');
+      return;
+    }
+
+    if (!deviceId) {
+      Alert.alert('Error', 'Please try again later.');
+      return;
+    }
+
+    const todayDate = moment().format('YYYY-MM-DD');
+
+    try {
+      // Get the count of all feedback documents for today
+      const feedbackDocs = await firestore()
+        .collection('feedback')
+        .where('date', '==', todayDate)
+        .get();
+
+      const feedbackCount = feedbackDocs.size + 1; // Get the next document number
+      const feedbackDocId = `${feedbackCount}_${todayDate}`;
+
+      await firestore().collection('feedback').doc(feedbackDocId).set({
+        feedback_text: feedback,
+        timestamp: firestore.FieldValue.serverTimestamp(),
+        device_id: deviceId,
+        date: todayDate,
+      });
+      setFeedback(''); // Clear feedback input after submission
+      setHasSubmittedFeedback(true);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to submit feedback. Please try again later.');
     }
   };
 
@@ -102,17 +177,27 @@ const SettingsScreen: React.FC = () => {
           <Text style={[styles.settingText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
             Feedback
           </Text>
-          <TextInput
-            style={[styles.feedbackInput, effectiveTheme === 'dark' ? styles.darkInput : styles.lightInput]}
-            placeholder="Write your feedback here..."
-            placeholderTextColor={effectiveTheme === 'dark' ? '#bbb' : '#999'}
-            value={feedback}
-            onChangeText={setFeedback}
-            multiline
-          />
-          <TouchableOpacity style={styles.submitButton}>
-            <Text style={styles.submitButtonText}>Submit</Text>
-          </TouchableOpacity>
+          {loading ? (
+            <ActivityIndicator size="small" color={effectiveTheme === 'dark' ? '#fff' : '#000'} />
+          ) : !hasSubmittedFeedback ? (
+            <>
+              <TextInput
+                style={[styles.feedbackInput, effectiveTheme === 'dark' ? styles.darkInput : styles.lightInput]}
+                placeholder="Write your feedback here..."
+                placeholderTextColor={effectiveTheme === 'dark' ? '#bbb' : '#999'}
+                value={feedback}
+                onChangeText={setFeedback}
+                multiline
+              />
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmitFeedback}>
+                <Text style={styles.submitButtonText}>Submit</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <Text style={[styles.thankYouText, effectiveTheme === 'dark' ? styles.darkText : styles.lightText]}>
+              Thanks for the feedback!
+            </Text>
+          )}
         </View>
 
         {/* About and Legal */}
@@ -165,6 +250,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  thankYouText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingVertical: 20,
   },
   lightText: {
     color: '#000',

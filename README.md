@@ -1,6 +1,6 @@
 # GophBar
 
-The app for bar-goers in dinkytown
+The app for bar-goers in dinkytown!
 
 # Installation
 
